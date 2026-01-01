@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import github_webhook, health, workflows, github_sync, debug, dashboard, auth, billing, settings, analytics, alerts
 from app.core.db import Base, engine
 from app.services.scheduling import start_scheduler, shutdown_scheduler
-from app.core.config import settings
+from app.core.config import settings as config_settings
 
 
 
@@ -16,7 +16,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="GitHub Actions Cron Monitor", version="0.1.0")
 
     origins = [
-        settings.FRONTEND_URL,
+        config_settings.FRONTEND_URL,
         "http://localhost:5173", # Keep local for dev
         "http://127.0.0.1:5173",
     ]
