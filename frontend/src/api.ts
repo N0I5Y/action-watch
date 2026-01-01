@@ -20,7 +20,7 @@ export interface SummaryStats {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 export async function fetchSummary(): Promise<SummaryStats> {
-  const res = await fetch(`${API_BASE}/summary`);
+  const res = await fetch(`${API_BASE}/summary`, { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to load summary');
   return res.json();
 }
@@ -30,7 +30,7 @@ export async function fetchWorkflowsStatus(
 ): Promise<WorkflowStatus[]> {
   const url = new URL(`${API_BASE}/workflows/status`);
   if (q) url.searchParams.set('q', q);
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), { credentials: 'include' });
   if (!res.ok) throw new Error('Failed to load workflows');
   return res.json();
 }

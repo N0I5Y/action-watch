@@ -26,12 +26,24 @@ class AuthResponse(BaseModel):
     installations: list[Installation]
 
 
-def get_current_user(authorization: str | None = Header(None)):
-    """Dependency to get current user from Authorization header."""
-    if not authorization or not authorization.startswith("Bearer "):
+from fastapi import APIRouter, Depends, HTTPException, Response, Header, Cookie
+
+# ... (rest of imports)
+
+def get_current_user(
+    authorization: str | None = Header(None),
+    gh_token: str | None = Cookie(None)
+):
+    """Dependency to get current user from Authorization header or Cookie."""
+    token = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.replace("Bearer ", "")
+    elif gh_token:
+        token = gh_token
+        
+    if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    token = authorization.replace("Bearer ", "")
     return {"token": token}
 
 
@@ -76,9 +88,9 @@ async def callback(code: str, response: Response, db: Session = Depends(get_db))
     response.set_cookie(
         key="gh_token",
         value=access_token,
-        httponly=False,
-        secure=False,
-        samesite="lax",
+        httponly=True,
+        secure=True,
+        samesite="none",
         max_age=86400 * 30  # 30 days
     )
     
@@ -172,3 +184,14 @@ async def get_me(db: Session = Depends(get_db), user_info = Depends(get_current_
     except Exception as e:
         print(f"Error in get_me: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    """Clear the auth cookie."""
+    response.delete_cookie(
+        key="gh_token",
+        samesite="none",
+        secure=True
+    )
+    return {"status": "logged out"}

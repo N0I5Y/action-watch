@@ -38,7 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check for existing session
         async function checkAuth() {
             try {
-                const res = await fetch(`${API_BASE}/auth/me`);
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    credentials: 'include'
+                });
                 if (res.ok) {
                     const data = await res.json();
                     setUser(data.user);
@@ -61,7 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const logout = async () => {
-        await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
+        await fetch(`${API_BASE}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
         setUser(null);
         setInstallations([]);
     };

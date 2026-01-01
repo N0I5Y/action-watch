@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import github_webhook, health, workflows, github_sync, debug, dashboard, auth, billing, settings, analytics, alerts
 from app.core.db import Base, engine
 from app.services.scheduling import start_scheduler, shutdown_scheduler
+from app.core.config import settings
 
 
 
@@ -14,9 +15,15 @@ from app.services.scheduling import start_scheduler, shutdown_scheduler
 def create_app() -> FastAPI:
     app = FastAPI(title="GitHub Actions Cron Monitor", version="0.1.0")
 
+    origins = [
+        settings.FRONTEND_URL,
+        "http://localhost:5173", # Keep local for dev
+        "http://127.0.0.1:5173",
+    ]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -34,7 +41,6 @@ def create_app() -> FastAPI:
     app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"]) 
     app.include_router(alerts.router, prefix="/api/alerts", tags=["alerts"]) 
 
-    @app.on_event("startup")
     @app.on_event("startup")
     async def _startup():
         Base.metadata.create_all(bind=engine)
