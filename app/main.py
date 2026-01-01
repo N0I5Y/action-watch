@@ -35,15 +35,8 @@ def create_app() -> FastAPI:
     app.include_router(alerts.router, prefix="/api/alerts", tags=["alerts"]) 
 
     @app.on_event("startup")
+    @app.on_event("startup")
     async def _startup():
-        from app.core.config import settings
-        db_url = settings.DATABASE_URL
-        masked_url = db_url
-        if "@" in db_url:
-            masked_url = db_url.split("@")[-1]
-            masked_url = f"*****@{masked_url}"
-        print(f"DEBUG STARTUP: Connection to DB detected as: {masked_url}")
-        
         Base.metadata.create_all(bind=engine)
         start_scheduler()
 
