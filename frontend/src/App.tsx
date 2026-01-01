@@ -14,7 +14,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useTimezone } from "./contexts/TimezoneContext";
 
 type CronFilter = "all" | "scheduled" | "unscheduled";
-type StatusFilter = "all" | "success" | "failure" | "running" | "pending";
+
 type SortOption = "name" | "lastRun" | "status";
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
 
   const [search, setSearch] = useState("");
   const [cronFilter, setCronFilter] = useState<CronFilter>("all");
-  const [sortBy, setSortBy] = useState<SortOption>("lastRun");
+  const [sortBy, _setSortBy] = useState<SortOption>("lastRun");
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<number | null>(
     null,
   );
@@ -148,7 +148,7 @@ function App() {
               onChange={(e) => setSelectedInstallationId(Number(e.target.value))}
               className="w-full bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-lg px-2.5 py-2 outline-none focus:border-indigo-500 appearance-none"
             >
-              {installations.map(inst => (
+              {installations.map((inst: any) => (
                 <option key={inst.id} value={inst.id}>
                   {inst.account_login}
                 </option>
@@ -461,7 +461,7 @@ function App() {
               {/* Right alerts + workflow details */}
               {isDetailsOpen && selectedWorkflowId && (
                 <WorkflowDetailsPanel
-                  workflowId={selectedWorkflowId}
+                  workflow={workflows.find(w => w.id === selectedWorkflowId)}
                   onClose={handleCloseDetails}
                 />
               )}
@@ -471,18 +471,20 @@ function App() {
       </div>
       {isSettingsOpen && selectedInstallationId && (
         <SettingsModal
+          isOpen={isSettingsOpen}
           installationId={selectedInstallationId}
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
       {isBillingOpen && selectedInstallationId && (
         <BillingModal
+          isOpen={isBillingOpen}
           installationId={selectedInstallationId}
           onClose={() => setIsBillingOpen(false)}
         />
       )}
       {isShortcutsOpen && (
-        <KeyboardShortcutsModal onClose={() => setIsShortcutsOpen(false)} />
+        <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
       )}
     </div>
   );
