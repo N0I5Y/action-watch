@@ -14,6 +14,19 @@ We will deploy two services on Railway:
 1.  **Backend**: Python (FastAPI) + PostgreSQL Database.
 2.  **Frontend**: Node.js (React/Vite) serving static files.
 
+## 🤖 Automated Deployment (Recommended)
+
+This repository includes a GitHub Action to deploy automatically.
+
+1.  **Get a Railway Token**:
+    *   Go to [Railway Dashboard](https://railway.app/project/tokens).
+    *   Generate a new token.
+2.  **Add to GitHub Secrets**:
+    *   Go to your GitHub Repo > Settings > Secrets and variables > Actions.
+    *   Add a New Repository Secret named `RAILWAY_TOKEN` with the value you copied.
+3.  **Push to Main**:
+    *   Any push to the `main` branch will now trigger a deployment.
+
 ---
 
 ## Step 1: Create Project & Database
