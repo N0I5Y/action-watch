@@ -170,8 +170,11 @@ def start_scheduler():
         id="check_scheduled_workflows",
         replace_existing=True,
     )
-    scheduler.start()
-    print("[monitor] APScheduler started")
+    if not scheduler.running:
+        scheduler.start()
+        print("[monitor] APScheduler started")
+    else:
+        print("[monitor] APScheduler already running")
 
 
 def shutdown_scheduler():
