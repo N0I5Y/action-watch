@@ -12,13 +12,14 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "start": "vite preview --host --port ${PORT:-4173}"
+    "start": "serve -s dist -l ${PORT:-4173} --no-clipboard"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "recharts": "^3.4.1"
+    "recharts": "^3.4.1",
+    "serve": "^14.2.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
