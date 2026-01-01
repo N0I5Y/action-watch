@@ -14,6 +14,20 @@ We will deploy two services on Railway:
 1.  **Backend**: Python (FastAPI) + PostgreSQL Database.
 2.  **Frontend**: Node.js (React/Vite) serving static files.
 
+## 🚀 Frontend Deployment (Separate Service)
+
+To deploy the Frontend, create a **New Service** in your Railway Project:
+
+1.  **Select Repo**: Choose the same `action-watch` repository.
+2.  **Variables**: Add `VITE_API_URL` pointing to your Backend URL + `/api` (e.g., `https://...up.railway.app/api`).
+3.  **Settings**:
+    *   **Root Directory**: `frontend`
+    *   **Build Command**: `npm run build`
+    *   **Start Command**: `npm run preview -- --host --port $PORT` (or use a static server like `serve`)
+
+## 🤖 Automated Deployment (Recommended)
+...
+
 ## 🤖 Automated Deployment (Recommended)
 
 This repository includes a GitHub Action to deploy automatically.
