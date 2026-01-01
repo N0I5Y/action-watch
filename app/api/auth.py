@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, Header
+from fastapi import APIRouter, Depends, HTTPException, Response, Header, Cookie
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 import httpx
@@ -25,10 +25,6 @@ class AuthResponse(BaseModel):
     user: User
     installations: list[Installation]
 
-
-from fastapi import APIRouter, Depends, HTTPException, Response, Header, Cookie
-
-# ... (rest of imports)
 
 def get_current_user(
     authorization: str | None = Header(None),
