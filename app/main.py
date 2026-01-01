@@ -15,18 +15,23 @@ from app.core.config import settings as config_settings
 def create_app() -> FastAPI:
     app = FastAPI(title="GitHub Actions Cron Monitor", version="0.1.0")
 
+    frontend_url = config_settings.FRONTEND_URL.rstrip("/")
     origins = [
-        config_settings.FRONTEND_URL,
-        "http://localhost:5173", # Keep local for dev
+        frontend_url,
+        f"{frontend_url}/",
+        "http://localhost:5173",
+        "http://localhost:5173/",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5173/",
     ]
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
+        expose_headers=["*"],
     )
 
     app.include_router(health.router, prefix="/api/health", tags=["health"])
