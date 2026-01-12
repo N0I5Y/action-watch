@@ -147,17 +147,6 @@ def sync_cron_expressions(db: Session):
     print("[github_sync] Sync complete")
 
 
-        db.commit()
-    
-    # After discovery, run strict cron sync for valid paths
-    sync_cron_expressions(db)
-
-    return {
-        "status": "completed",
-        "installations_scanned": len(user_installations),
-        "repos_found": len(repos_data) if 'repos_data' in locals() else 0,
-        # 'wfs_data' might be overwritten in loop so just return basic stats
-    }
 
 def discover_and_sync_workflows(db: Session, user_installations: List[int]) -> Dict:
     """
