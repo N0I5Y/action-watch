@@ -37,7 +37,7 @@ async def sync_workflows(
         installation_ids = [inst.get("id") for inst in installations_data.get("installations", [])]
         
         # 2. Run Discovery
-        discover_and_sync_workflows(db, installation_ids)
+        stats = discover_and_sync_workflows(db, installation_ids)
         
     except Exception as e:
         print(f"Sync failed: {e}")
@@ -45,4 +45,4 @@ async def sync_workflows(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e),
         )
-    return {"status": "ok", "synced_installations": len(installation_ids)}
+    return stats

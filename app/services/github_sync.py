@@ -147,20 +147,44 @@ def sync_cron_expressions(db: Session):
     print("[github_sync] Sync complete")
 
 
-def discover_and_sync_workflows(db: Session, user_installations: List[int]):
+        db.commit()
+    
+    # After discovery, run strict cron sync for valid paths
+    sync_cron_expressions(db)
+
+    return {
+        "status": "completed",
+        "installations_scanned": len(user_installations),
+        "repos_found": len(repos_data) if 'repos_data' in locals() else 0,
+        # 'wfs_data' might be overwritten in loop so just return basic stats
+    }
+
+def discover_and_sync_workflows(db: Session, user_installations: List[int]) -> Dict:
     """
     Discover repos and workflows for the given installation IDs and sync to DB.
+    Returns a summary dict for debugging.
     """
     import httpx
     from app.services.github_auth import get_installation_token
     from app.models.workflow import Organization, Repository, Workflow
     
+    stats = {
+        "installations_processed": 0,
+        "repos_found": 0,
+        "workflows_found": 0,
+        "errors": []
+    }
+
     for installation_id in user_installations:
         try:
             token = get_installation_token(installation_id)
         except Exception as e:
-            print(f"[github_sync] Failed to get token for inst {installation_id}: {e}")
+            msg = f"Failed to get token for inst {installation_id}: {e}"
+            print(f"[github_sync] {msg}")
+            stats["errors"].append(msg)
             continue
+        
+        stats["installations_processed"] += 1
 
         # 1. Get Installation Repos
         headers = {
@@ -168,16 +192,18 @@ def discover_and_sync_workflows(db: Session, user_installations: List[int]):
             "Accept": "application/vnd.github.v3+json",
         }
         
-        # Pagination support omitted for brevity, adding loop for 100 max for now
         repos_resp = httpx.get(
             "https://api.github.com/installation/repositories?per_page=100", 
             headers=headers
         )
         if repos_resp.status_code != 200:
-            print(f"[github_sync] Failed to fetch repos: {repos_resp.text}")
+            msg = f"Failed to fetch repos for inst {installation_id}: {repos_resp.status_code} {repos_resp.text}"
+            print(f"[github_sync] {msg}")
+            stats["errors"].append(msg)
             continue
             
         repos_data = repos_resp.json().get("repositories", [])
+        stats["repos_found"] += len(repos_data)
         
         # 2. Process Repos
         for repo_data in repos_data:
@@ -186,64 +212,73 @@ def discover_and_sync_workflows(db: Session, user_installations: List[int]):
             full_name = repo_data["full_name"]
             github_repo_id = repo_data["id"]
 
-            # Ensure Org exists
-            org_github_id = repo_data["owner"]["id"]
-            org = db.query(Organization).filter(Organization.github_org_id == org_github_id).first()
-            if not org:
-                org = Organization(
-                    github_org_id=org_github_id,
-                    installation_id=installation_id,
-                    name=owner_login
-                )
-                db.add(org)
-                db.flush() # get ID
-
-            # Ensure Repo exists
-            repo = db.query(Repository).filter(Repository.github_repo_id == github_repo_id).first()
-            if not repo:
-                repo = Repository(
-                    github_repo_id=github_repo_id,
-                    org_id=org.id,
-                    name=repo_name,
-                    full_name=full_name
-                )
-                db.add(repo)
-                db.flush()
-
-            # 3. Get Workflows for Repo
-            wf_resp = httpx.get(
-                f"https://api.github.com/repos/{full_name}/actions/workflows",
-                headers=headers
-            )
-            if wf_resp.status_code != 200:
-                continue
-                
-            wfs_data = wf_resp.json().get("workflows", [])
-            for wf_data in wfs_data:
-                github_wf_id = wf_data["id"]
-                wf_name = wf_data["name"]
-                wf_path = wf_data["path"]
-                
-                # Upsert Workflow
-                wf = db.query(Workflow).filter(Workflow.github_workflow_id == github_wf_id).first()
-                if not wf:
-                    wf = Workflow(
-                        github_workflow_id=github_wf_id,
-                        repo_id=repo.id,
-                        name=wf_name,
-                        path=wf_path,
-                        state=wf_data["state"],
-                        active=(wf_data["state"] == "active")
+            try:
+                # Ensure Org exists
+                org_github_id = repo_data["owner"]["id"]
+                org = db.query(Organization).filter(Organization.github_org_id == org_github_id).first()
+                if not org:
+                    org = Organization(
+                        github_org_id=org_github_id,
+                        installation_id=installation_id,
+                        name=owner_login
                     )
-                    db.add(wf)
-                    # We will sync cron separately or optionally here
-                else:
-                    wf.name = wf_name
-                    wf.path = wf_path
-                    wf.state = wf_data["state"]
-                    wf.active = (wf_data["state"] == "active")
+                    db.add(org)
+                    db.flush() 
+
+                # Ensure Repo exists
+                repo = db.query(Repository).filter(Repository.github_repo_id == github_repo_id).first()
+                if not repo:
+                    repo = Repository(
+                        github_repo_id=github_repo_id,
+                        org_id=org.id,
+                        name=repo_name,
+                        full_name=full_name
+                    )
+                    db.add(repo)
+                    db.flush()
+
+                # 3. Get Workflows for Repo
+                wf_resp = httpx.get(
+                    f"https://api.github.com/repos/{full_name}/actions/workflows",
+                    headers=headers
+                )
+                if wf_resp.status_code != 200:
+                    stats["errors"].append(f"Failed to fetch workflows for {full_name}: {wf_resp.status_code}")
+                    continue
+                    
+                wfs_data = wf_resp.json().get("workflows", [])
+                stats["workflows_found"] += len(wfs_data)
+
+                for wf_data in wfs_data:
+                    github_wf_id = wf_data["id"]
+                    wf_name = wf_data["name"]
+                    wf_path = wf_data["path"]
+                    
+                    # Upsert Workflow
+                    wf = db.query(Workflow).filter(Workflow.github_workflow_id == github_wf_id).first()
+                    if not wf:
+                        wf = Workflow(
+                            github_workflow_id=github_wf_id,
+                            repo_id=repo.id,
+                            name=wf_name,
+                            path=wf_path,
+                            state=wf_data["state"],
+                            active=(wf_data["state"] == "active")
+                        )
+                        db.add(wf)
+                    else:
+                        wf.name = wf_name
+                        wf.path = wf_path
+                        wf.state = wf_data["state"]
+                        wf.active = (wf_data["state"] == "active")
+                        
+            except Exception as inner_e:
+                stats["errors"].append(f"Error processing repo {full_name}: {inner_e}")
+                continue
 
         db.commit()
     
-    # After discovery, run strict cron sync for valid paths
+    # After discovery, run strict cron sync to update cron_expressions
     sync_cron_expressions(db)
+    
+    return stats
