@@ -4,8 +4,13 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import Integer, String, DateTime, ForeignKey, BigInteger
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-# ... (omitted)
+from app.core.db import Base
+
+
+class WorkflowRun(Base):
+    __tablename__ = "workflow_runs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     github_run_id: Mapped[int] = mapped_column(BigInteger, index=True, unique=True)
@@ -24,4 +29,3 @@ from sqlalchemy import Integer, String, DateTime, ForeignKey, BigInteger
     raw_payload: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     workflow = relationship("Workflow", back_populates="runs")
-
