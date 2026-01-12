@@ -243,23 +243,23 @@ def discover_and_sync_workflows(db: Session, user_installations: List[int]) -> D
                     wf_name = wf_data["name"]
                     wf_path = wf_data["path"]
                     
-                    # Upsert Workflow
-                    wf = db.query(Workflow).filter(Workflow.github_workflow_id == github_wf_id).first()
-                    if not wf:
-                        wf = Workflow(
-                            github_workflow_id=github_wf_id,
-                            repo_id=repo.id,
-                            name=wf_name,
-                            path=wf_path,
-                            state=wf_data["state"],
-                            active=(wf_data["state"] == "active")
-                        )
-                        db.add(wf)
-                    else:
-                        wf.name = wf_name
-                        wf.path = wf_path
-                        wf.state = wf_data["state"]
-                        wf.active = (wf_data["state"] == "active")
+                # Upsert Workflow
+                wf = db.query(Workflow).filter(Workflow.github_workflow_id == github_wf_id).first()
+                if not wf:
+                    wf = Workflow(
+                        github_workflow_id=github_wf_id,
+                        repo_id=repo.id,
+                        name=wf_name,
+                        path=wf_path,
+                        # state=wf_data["state"],  <-- REMOVED
+                        active=(wf_data["state"] == "active")
+                    )
+                    db.add(wf)
+                else:
+                    wf.name = wf_name
+                    wf.path = wf_path
+                    # wf.state = wf_data["state"] <-- REMOVED
+                    wf.active = (wf_data["state"] == "active")
                         
             except Exception as inner_e:
                 stats["errors"].append(f"Error processing repo {full_name}: {inner_e}")
