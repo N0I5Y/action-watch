@@ -13,8 +13,15 @@ from app.schemas.workflow_run import WorkflowRunSchema
 router = APIRouter()
 
 
+from app.api.auth import get_current_user
+
+# ...
+
 @router.get("/", response_model=List[WorkflowSummary])
-def list_workflows(db: Session = Depends(get_db)):
+def list_workflows(
+    db: Session = Depends(get_db),
+    user_info = Depends(get_current_user)
+):
     workflows = db.query(Workflow).all()
     result: list[WorkflowSummary] = []
 
