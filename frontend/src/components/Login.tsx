@@ -2,17 +2,49 @@
 import { useAuth } from '../contexts/AuthContext';
 
 export function Login() {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { login } = useAuth();
+
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <h1 className="text-3xl font-bold mb-8">CronWatch</h1>
-            <button
-                onClick={login}
-                className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-            >
-                Sign in with GitHub
-            </button>
+        <div className="relative flex flex-col items-center justify-center min-h-screen bg-slate-950 overflow-hidden text-slate-200">
+            {/* Background Effects */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/20 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[120px]" />
+            </div>
+
+            <div className="relative z-10 w-full max-w-md p-8">
+                <div className="flex flex-col items-center justify-center space-y-8 bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-10 rounded-2xl shadow-2xl">
+                    {/* Logo / Brand */}
+                    <div className="text-center space-y-2">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg shadow-blue-500/20 mb-4">
+                            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight text-white">CronWatch</h1>
+                        <p className="text-slate-400">Monitor your GitHub Actions cron jobs properly.</p>
+                    </div>
+
+                    {/* Login Button */}
+                    <button
+                        onClick={login}
+                        className="group relative w-full flex items-center justify-center gap-3 px-6 py-3.5 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                    >
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                        <span>Sign in with GitHub</span>
+                    </button>
+
+                    <div className="text-xs text-center text-slate-500">
+                        By signing in, you agree to our Terms of Service.
+                    </div>
+                </div>
+
+                <div className="mt-8 text-center text-sm text-slate-600">
+                    <p>Powered by Railway & GitHub Actions</p>
+                </div>
+            </div>
         </div>
     );
 }
