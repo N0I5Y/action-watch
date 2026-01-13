@@ -13,12 +13,13 @@ def is_pro_user(organization_id: int, db: Session) -> bool:
     Returns:
         True if organization has active subscription, False otherwise
     """
-    subscription = db.query(Subscription).filter(
-        Subscription.organization_id == organization_id,
-        Subscription.status == "active"
-    ).first()
+    # subscription = db.query(Subscription).filter(
+    #     Subscription.organization_id == organization_id,
+    #     Subscription.status == "active"
+    # ).first()
     
-    return subscription is not None
+    # return subscription is not None
+    return True # Temporarily enable Pro features for development
 
 
 def get_subscription_info(organization_id: int, db: Session) -> dict:
