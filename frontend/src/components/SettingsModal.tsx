@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,8 +18,10 @@ interface SettingsData {
     anomaly_threshold_stddev: number;
 }
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 export function SettingsModal({ isOpen, onClose, installationId }: SettingsModalProps) {
-    const { } = useAuth(); // Removed token
+    const { } = useAuth(); // Removed token dependency
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState<SettingsData>({
@@ -45,8 +45,8 @@ export function SettingsModal({ isOpen, onClose, installationId }: SettingsModal
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/settings/${installationId}`, {
-                credentials: 'include' // Use cookie
+            const res = await fetch(`${API_BASE}/settings/${installationId}`, {
+                credentials: 'include'
             });
             if (res.ok) {
                 const data = await res.json();
@@ -62,12 +62,12 @@ export function SettingsModal({ isOpen, onClose, installationId }: SettingsModal
     const handleSave = async () => {
         setSaving(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/settings/${installationId}`, {
+            const res = await fetch(`${API_BASE}/settings/${installationId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include', // Use cookie
+                credentials: 'include',
                 body: JSON.stringify(settings)
             });
             if (res.ok) {
