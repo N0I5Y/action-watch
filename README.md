@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 CronWatch
+# 🚀 ActionWatch
 
 ### Never Miss a Scheduled Workflow Again
 
@@ -16,7 +16,7 @@
 
 ---
 
-## 🎯 Why CronWatch?
+## 🎯 Why ActionWatch?
 
 GitHub Actions scheduled workflows are critical for CI/CD, but they fail silently. **CronWatch ensures your cron jobs run on time, every time.**
 
