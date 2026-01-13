@@ -21,7 +21,7 @@ interface SettingsData {
 }
 
 export function SettingsModal({ isOpen, onClose, installationId }: SettingsModalProps) {
-    const { token } = useAuth();
+    const { } = useAuth(); // Removed token
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [settings, setSettings] = useState<SettingsData>({
@@ -36,21 +36,17 @@ export function SettingsModal({ isOpen, onClose, installationId }: SettingsModal
     });
 
     useEffect(() => {
-        if (isOpen && installationId && token) {
+        if (isOpen && installationId) {
             fetchSettings();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, installationId, token]);
+    }, [isOpen, installationId]);
 
     const fetchSettings = async () => {
         setLoading(true);
         try {
-            // Updated to use the correct backend URL from context or relative path if proxy is set up
-            // Assuming relative path for now as per other components
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/settings/${installationId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include' // Use cookie
             });
             if (res.ok) {
                 const data = await res.json();
@@ -69,9 +65,9 @@ export function SettingsModal({ isOpen, onClose, installationId }: SettingsModal
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/settings/${installationId}`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include', // Use cookie
                 body: JSON.stringify(settings)
             });
             if (res.ok) {
